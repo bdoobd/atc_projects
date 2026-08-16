@@ -1,5 +1,6 @@
 .ipynb_checkpoints/
 files/
+.venv/
 
 clean_data*
 calculated*
