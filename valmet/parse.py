@@ -73,6 +73,35 @@ def extract_weight_and_dimensions(pdf_file):
 
     return output
 
+def write_to_excel(output, filename='output.xlsx'):
+    df = pd.DataFrame(output)
+    
+    total_rows = df.shape[0]
+    
+    total_net = df['net_weight'].sum()
+    total_gross = df['gross_weight'].sum()
+    total_volume = df['volume'].sum()
+    
+    total_index = f'Total ({total_rows} rows)'
+    
+    df.loc[total_index] = {
+            'net_weight': total_net,
+            'gross_weight': total_gross,
+            'volume': total_volume
+    }
+    
+    cleaned_totals = df.fillna('')
+    
+    with pd.ExcelWriter(filename, engine='openpyxl') as writer:
+        cleaned_totals.to_excel(writer, sheet_name='Sheet1')
+    
+        worksheet = writer.sheets['Sheet1']
+    
+        for column in worksheet.columns:
+            max_length = max(len(str(cell.value or '')) for cell in column)
+            letter = column[0].column_letter
+            worksheet.column_dimensions[letter].width = max(max_length + 3, 10)
+    
 if __name__ == "__main__":
     folder = get_doc_folder()
     output = []
@@ -81,8 +110,6 @@ if __name__ == "__main__":
         pdf_output = extract_weight_and_dimensions(pdf_file)
         output.append(pdf_output)
 
+    write_to_excel(output)
 
-
-    df = pd.DataFrame(output)
-
-    print(df)
+    
