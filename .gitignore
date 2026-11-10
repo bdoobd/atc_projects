@@ -6,3 +6,4 @@ packs/
 clean_data*
 calculated*
 table*
+*.xlsx
