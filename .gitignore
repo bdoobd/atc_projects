@@ -7,3 +7,4 @@ clean_data*
 calculated*
 table*
 *.xlsx
+.DS_Store
