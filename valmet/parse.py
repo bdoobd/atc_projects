@@ -24,11 +24,14 @@ def get_doc_folder():
 def extract_weight_and_dimensions(pdf_file):
     WEIGHT_HEADER_PATTERN = re.compile(r"Gross\s+wt\.\s+kg\s+Net\s+weight", re.IGNORECASE)
     DIMS_HEADER_PATTERN = re.compile(r"Length\s+Width\s+Height", re.IGNORECASE)
+    PACKID_HEADER_PATTERN = re.compile(r"Packing\s+list\s+ID", re.IGNORECASE)
 
     WEIGHT_PATTERN = re.compile(r"([\d.]+)\s*kg\s+([\d.]+)\s*kg\s+([\d.]+)\s*m3", re.IGNORECASE)
     DIMS_PATTERN = re.compile(r"([\d.]+)\s*cm\s+([\d.]+)\s*cm\s+([\d.]+)\s*cm", re.IGNORECASE)
+    PACK_PATTERN = re.compile(r"(?:\d+\s+)?(\d{7,12})\b", re.IGNORECASE)
 
     output = {
+        "packing_list_id": '',
         "length": 0.0,
         "width": 0.0,
         "height": 0.0,
@@ -44,6 +47,8 @@ def extract_weight_and_dimensions(pdf_file):
                 text += page.extract_text() + "\n"
             
             lines = text.split('\n');
+
+            # print(lines)
 
             for i, line in enumerate(lines):
                 if WEIGHT_HEADER_PATTERN.search(line):
@@ -67,6 +72,14 @@ def extract_weight_and_dimensions(pdf_file):
                             output['height'] = float(match.group(3))
                         else:
                             print(f"No dimension data found in '{pdf_file.name}' after the header line.")
+
+                if PACKID_HEADER_PATTERN.search(line) and i + 1 < len(lines):
+                    pack_line = lines[i + 1].strip()
+                    match = PACK_PATTERN.search(pack_line)
+                    if match:
+                        output['packing_list_id'] = match.group(1)
+                    else:
+                        print(f'No Pack ID found in {pdf_file}: {pack_line}')
 
     except Exception as e:
         print(f"Failed to process '{pdf_file.name}': {e}")
@@ -110,6 +123,9 @@ if __name__ == "__main__":
         pdf_output = extract_weight_and_dimensions(pdf_file)
         output.append(pdf_output)
 
-    write_to_excel(output)
+    print(output)
+    # FIXME: При передачи пустого списка вылетает фатальная ошибка
+    # Добавить проверку списка перед выводом в Excel
+    # write_to_excel(output)
 
     
