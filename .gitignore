@@ -1,6 +1,7 @@
 .ipynb_checkpoints/
 files/
 packs/
+loads/
 .venv/
 
 clean_data*
